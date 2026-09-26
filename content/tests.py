@@ -70,6 +70,7 @@ class ContentApiTests(TestCase):
             "team",
             "testimonials",
             "faqs",
+            "footerBottom",
         }
         self.assertEqual(set(data), expected)
 
@@ -629,3 +630,70 @@ class YourIdeaHighlightTests(TestCase):
         payload = self.client.get("/api/content/").json()
 
         self.assertEqual(payload["yourIdea"]["headingHighlight"], "")
+
+
+class FooterBottomTests(TestCase):
+    def test_the_api_carries_the_wording_and_the_menu(self):
+        from content.models import FooterBottomSection, FooterLink
+
+        section = FooterBottomSection.objects.create(
+            menu_label="Quick links",
+            contact_label="Talk to us",
+            enquiry_label="Start a project",
+            enquiry_href="/contact",
+            copyright_note="Built in Nepal.",
+        )
+        FooterLink.objects.create(section=section, label="Home", href="/", order=0)
+        FooterLink.objects.create(section=section, label="Work", href="/work", order=1)
+
+        footer = self.client.get("/api/content/").json()["footerBottom"]
+
+        self.assertEqual(footer["menuLabel"], "Quick links")
+        self.assertEqual(footer["contactLabel"], "Talk to us")
+        self.assertEqual(footer["enquiryLabel"], "Start a project")
+        self.assertEqual(footer["copyrightNote"], "Built in Nepal.")
+        self.assertEqual([link["label"] for link in footer["menu"]], ["Home", "Work"])
+
+    def test_an_unpublished_link_is_left_out(self):
+        from content.models import FooterBottomSection, FooterLink
+
+        section = FooterBottomSection.objects.create()
+        FooterLink.objects.create(section=section, label="Home", href="/", order=0)
+        FooterLink.objects.create(section=section, label="Draft", href="/draft", order=1, is_published=False)
+
+        footer = self.client.get("/api/content/").json()["footerBottom"]
+
+        self.assertEqual([link["label"] for link in footer["menu"]], ["Home"])
+
+    def test_a_missing_section_still_answers(self):
+        """The API must not 500 before the section has been created."""
+        footer = self.client.get("/api/content/").json()["footerBottom"]
+
+        self.assertEqual(footer["menuLabel"], "Menu")
+        self.assertEqual(footer["menu"], [])
+
+
+class WhatsAppNumberTests(TestCase):
+    def test_a_number_writes_the_wa_me_link(self):
+        link = SocialLink.objects.create(platform="whatsapp", label="WhatsApp", whatsapp_number="977 9800000000")
+
+        link.refresh_from_db()
+
+        self.assertEqual(link.href, "https://wa.me/9779800000000")
+
+    def test_punctuation_in_the_number_is_dropped(self):
+        link = SocialLink.objects.create(platform="whatsapp", label="WhatsApp", whatsapp_number="+977-980 000 0000")
+
+        self.assertEqual(link.href, "https://wa.me/9779800000000")
+
+    def test_other_platforms_keep_the_url_they_were_given(self):
+        link = SocialLink.objects.create(
+            platform="facebook", label="Facebook", whatsapp_number="977 1", href="https://facebook.com/orik"
+        )
+
+        self.assertEqual(link.href, "https://facebook.com/orik")
+
+    def test_a_whatsapp_row_without_a_number_keeps_its_own_url(self):
+        link = SocialLink.objects.create(platform="whatsapp", label="WhatsApp", href="https://wa.me/123")
+
+        self.assertEqual(link.href, "https://wa.me/123")

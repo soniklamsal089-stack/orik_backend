@@ -10,6 +10,8 @@ from django.db import transaction
 
 from content.models import (
     DigitalExperiencesSection,
+    FooterBottomSection,
+    FooterLink,
     FooterTopSection,
     IndustriesSection,
     Template,
@@ -73,6 +75,24 @@ SOCIALS = [
     ("instagram", "Instagram"),
     ("facebook", "Facebook"),
     ("linkedin", "LinkedIn"),
+]
+
+FOOTER_BOTTOM = {
+    "menu_label": "Menu",
+    "contact_label": "Contact Us",
+    "enquiry_label": "Send us an enquiry",
+    "enquiry_href": "/contact",
+    "copyright_note": "All Rights Reserved.",
+}
+
+FOOTER_LINKS = [
+    ("Home", "/"),
+    ("Work", "/work"),
+    ("About", "/about"),
+    ("Process", "/process"),
+    ("Pricing", "/pricing"),
+    ("FAQ", "/faq"),
+    ("Contact", "/contact"),
 ]
 
 DIGITAL_EXPERIENCES = {
@@ -284,13 +304,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.quiet = options["verbosity"] == 0
         if options["reset"]:
-            for model in (HeroBadge, Template, SocialLink, Stat, Problem, Industry, Project, ProcessStep, Package, TeamMember, Testimonial, FaqItem):
+            for model in (HeroBadge, Template, SocialLink, FooterLink, Stat, Problem, Industry, Project, ProcessStep, Package, TeamMember, Testimonial, FaqItem):
                 model.objects.all().delete()
             HeroSection.objects.all().delete()
             YourIdeaSection.objects.all().delete()
             DigitalExperiencesSection.objects.all().delete()
             IndustriesSection.objects.all().delete()
             FooterTopSection.objects.all().delete()
+            FooterBottomSection.objects.all().delete()
             self.say(self.style.WARNING("Existing content deleted."))
 
         settings_row, _ = SiteSettings.objects.get_or_create(pk=1, defaults=SITE)
@@ -303,6 +324,7 @@ class Command(BaseCommand):
         hero, hero_created = HeroSection.objects.get_or_create(pk=1, defaults=HERO)
         self.say(f"  hero: {'created' if hero_created else 'left as edited'} ({hero.heading[:40]})")
 
+        footer_bottom, _ = FooterBottomSection.objects.get_or_create(pk=1, defaults=FOOTER_BOTTOM)
         idea, idea_created = YourIdeaSection.objects.get_or_create(pk=1, defaults=YOUR_IDEA)
         self.say(f"  your idea: {'created' if idea_created else 'left as edited'}")
 
@@ -333,6 +355,9 @@ class Command(BaseCommand):
         counts = {
             "hero badges": self._seed(
                 HeroBadge, HERO_BADGES, lambda i, row: ({"hero": hero, "label": row[0]}, {"icon": row[1], "order": i})
+            ),
+            "footer links": self._seed(
+                FooterLink, FOOTER_LINKS, lambda i, row: ({"label": row[0]}, {"section": footer_bottom, "href": row[1], "order": i})
             ),
             "social links": self._seed(SocialLink, SOCIALS, lambda i, row: ({"platform": row[0]}, {"label": row[1], "order": i})),
             "stats": self._seed(

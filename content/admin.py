@@ -5,6 +5,8 @@ from .icons import glyph
 
 from .models import (
     DigitalExperiencesSection,
+    FooterBottomSection,
+    FooterLink,
     FooterTopSection,
     IndustriesSection,
     Template,
@@ -178,12 +180,51 @@ class FooterTopAdmin(admin.ModelAdmin):
         return False
 
 
+class FooterLinkInline(admin.TabularInline):
+    """The menu column, edited inside the footer it belongs to."""
+
+    model = FooterLink
+    extra = 0
+    fields = ["label", "href", "order", "is_published"]
+    ordering = ["order", "id"]
+
+
+@admin.register(FooterBottomSection)
+class FooterBottomAdmin(admin.ModelAdmin):
+    list_display = ["__str__", "updated_at"]
+    inlines = [FooterLinkInline]
+    fieldsets = [
+        ("Column headings", {"fields": ["menu_label", "contact_label"]}),
+        (
+            "Contact column",
+            {
+                "fields": ["enquiry_label", "enquiry_href"],
+                "description": "The email, phone and location below it come from Site settings.",
+            },
+        ),
+        (
+            "Middle column",
+            {
+                "fields": [],
+                "description": "The name and description shown there are the ones in Site settings.",
+            },
+        ),
+        ("Copyright", {"fields": ["copyright_note"]}),
+    ]
+
+    def has_add_permission(self, request):
+        return not FooterBottomSection.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(SocialLink)
 class SocialLinkAdmin(OrderedAdmin):
     display_columns = ["icon", "label", "platform", "href", "visibility"]
     list_display_links = ["icon", "label"]
     readonly_fields = ["icon_preview"]
-    fields = ["icon_preview", "platform", "label", "href", "order", "is_published"]
+    fields = ["icon_preview", "platform", "label", "whatsapp_number", "href", "order", "is_published"]
 
     @admin.display(description="icon")
     def icon(self, obj):

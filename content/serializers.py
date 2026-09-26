@@ -8,6 +8,8 @@ from rest_framework import serializers
 
 from .models import (
     DigitalExperiencesSection,
+    FooterBottomSection,
+    FooterLink,
     FooterTopSection,
     IndustriesSection,
     Template,
@@ -195,6 +197,32 @@ class TeamMemberSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         # Absolute, so the Next.js server can fetch it from its own process.
         return request.build_absolute_uri(obj.photo.url) if request else obj.photo.url
+
+
+class FooterLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FooterLink
+        fields = ["label", "href"]
+
+
+class FooterBottomSerializer(serializers.ModelSerializer):
+    """The three columns at the foot of the page, plus the copyright line."""
+
+    menuLabel = serializers.CharField(source="menu_label", read_only=True)
+    contactLabel = serializers.CharField(source="contact_label", read_only=True)
+    enquiryLabel = serializers.CharField(source="enquiry_label", read_only=True)
+    enquiryHref = serializers.CharField(source="enquiry_href", read_only=True)
+    copyrightNote = serializers.CharField(source="copyright_note", read_only=True)
+    menu = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FooterBottomSection
+        fields = ["menuLabel", "menu", "contactLabel", "enquiryLabel", "enquiryHref", "copyrightNote"]
+
+    def get_menu(self, obj):
+        # An unsaved fallback section has no related rows yet.
+        links = obj.links.published() if obj.pk else FooterLink.objects.none()
+        return FooterLinkSerializer(links, many=True).data
 
 
 class FooterTopSerializer(serializers.ModelSerializer):

@@ -1,3 +1,4 @@
+import re
 """Editable site content.
 
 Everything here is copy the site owner should be able to change without a
@@ -223,10 +224,25 @@ class SocialLink(OrderedContent):
 
     platform = models.CharField(max_length=20, choices=PLATFORMS, unique=True)
     label = models.CharField(max_length=40)
+    whatsapp_number = models.CharField(
+        max_length=24,
+        blank=True,
+        help_text="WhatsApp only. The number with its country code, e.g. 977 9800000000. "
+        "Fill this in and the link below is written for you.",
+    )
     href = models.URLField(
         blank=True,
-        help_text="Full URL. For WhatsApp use https://wa.me/<number>. Blank links stay hidden on the site.",
+        help_text="Full URL of the profile. Blank links stay hidden on the site.",
     )
+
+    def save(self, *args, **kwargs):
+        # A phone number is far easier to get right than a wa.me URL, so when
+        # one is given it wins and the link is built from it.
+        if self.platform == "whatsapp" and self.whatsapp_number:
+            digits = re.sub(r"\D", "", self.whatsapp_number)
+            if digits:
+                self.href = f"https://wa.me/{digits}"
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.label
@@ -460,6 +476,59 @@ class TeamMember(OrderedContent):
             ("email", f"mailto:{self.email}" if self.email else ""),
         ]
         return [{"platform": platform, "href": href} for platform, href in pairs if href]
+
+
+class FooterBottomSection(models.Model):
+    """The three columns at the foot of every page, and the copyright line.
+
+    The middle column is the site name and description from Site settings, so
+    there is one place to change those; only this section's own wording and
+    the menu beside it live here.
+    """
+
+    menu_label = models.CharField(max_length=40, default="Menu", help_text="Heading above the list of links.")
+    contact_label = models.CharField(max_length=40, default="Contact Us")
+    enquiry_label = models.CharField(max_length=60, default="Send us an enquiry")
+    enquiry_href = models.CharField(max_length=120, default="/contact", help_text='A path such as "/contact".')
+    copyright_note = models.CharField(
+        max_length=80,
+        default="All Rights Reserved.",
+        help_text="Follows the year and the site name.",
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "footer bottom"
+        verbose_name_plural = "footer bottom"
+
+    def __str__(self):
+        return "Footer bottom"
+
+    def clean(self):
+        if not self.pk and FooterBottomSection.objects.exists():
+            raise ValidationError("This section already exists — edit it instead of adding another.")
+
+    @classmethod
+    def load(cls):
+        return cls.objects.first() or cls()
+
+
+class FooterLink(OrderedContent):
+    """One entry in the footer's menu column."""
+
+    section = models.ForeignKey(
+        FooterBottomSection,
+        related_name="links",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text="Set automatically; links are edited inside the section.",
+    )
+    label = models.CharField(max_length=40)
+    href = models.CharField(max_length=120, help_text='A path such as "/work".')
+
+    def __str__(self):
+        return self.label
 
 
 class FooterTopSection(models.Model):

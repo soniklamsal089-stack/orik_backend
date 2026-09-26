@@ -241,6 +241,7 @@ JAZZMIN_SETTINGS = {
         "content.SiteSettings",
         "content.SocialLink",
         "content.FooterTopSection",
+        "content.FooterBottomSection",
         "enquiries",
         "auth",
     ],
