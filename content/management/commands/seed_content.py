@@ -65,12 +65,13 @@ HERO_BADGES = [
     ("SEO ready", "seo"),
 ]
 
+# The four the footer is meant to show. Each starts with an empty href, so
+# nothing appears on the site until a real profile URL is filled in.
 SOCIALS = [
-    ("twitter", "Twitter"),
+    ("whatsapp", "WhatsApp"),
+    ("instagram", "Instagram"),
     ("facebook", "Facebook"),
-    ("youtube", "YouTube"),
     ("linkedin", "LinkedIn"),
-    ("medium", "Medium"),
 ]
 
 DIGITAL_EXPERIENCES = {

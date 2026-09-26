@@ -98,6 +98,13 @@ class ContentApiTests(TestCase):
         Stat.objects.create(value="1", label="first", order=1)
         self.assertEqual([s["value"] for s in self.get()["stats"]], ["1", "2"])
 
+    def test_social_links_without_a_url_are_hidden(self):
+        SocialLink.objects.create(platform="whatsapp", label="WhatsApp", href="https://wa.me/123", order=0)
+        SocialLink.objects.create(platform="instagram", label="Instagram", href="", order=1)
+
+        platforms = [s["platform"] for s in self.get()["site"]["socials"]]
+        self.assertEqual(platforms, ["whatsapp"])
+
     def test_blank_contact_fields_are_omitted(self):
         contact = self.get()["site"]["contact"]
         self.assertEqual(contact, {"email": "hi@orik.test"})

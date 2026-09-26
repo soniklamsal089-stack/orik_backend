@@ -119,7 +119,9 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
         return {key: value for key, value in (("email", obj.email), ("phone", obj.phone), ("location", obj.location)) if value}
 
     def get_socials(self, obj):
-        return SocialLinkSerializer(SocialLink.objects.published(), many=True).data
+        # A link with no URL yet would render as a dead icon in the footer.
+        links = SocialLink.objects.published().exclude(href="")
+        return SocialLinkSerializer(links, many=True).data
 
 
 class StatSerializer(serializers.ModelSerializer):

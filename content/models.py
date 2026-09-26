@@ -213,16 +213,21 @@ class HeroBadge(OrderedContent):
 
 class SocialLink(OrderedContent):
     PLATFORMS = [
-        ("twitter", "Twitter"),
+        ("whatsapp", "WhatsApp"),
+        ("instagram", "Instagram"),
         ("facebook", "Facebook"),
-        ("youtube", "YouTube"),
         ("linkedin", "LinkedIn"),
+        ("twitter", "Twitter"),
+        ("youtube", "YouTube"),
         ("medium", "Medium"),
     ]
 
     platform = models.CharField(max_length=20, choices=PLATFORMS, unique=True)
     label = models.CharField(max_length=40)
-    href = models.URLField(blank=True, help_text="Leave blank until the profile exists; blank links are hidden.")
+    href = models.URLField(
+        blank=True,
+        help_text="Full URL. For WhatsApp use https://wa.me/<number>. Blank links stay hidden on the site.",
+    )
 
     def __str__(self):
         return self.label
