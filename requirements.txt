@@ -3,6 +3,8 @@ djangorestframework>=3.17
 django-cors-headers>=4.9
 django-jazzmin>=3.0
 python-dotenv>=1.2
+# Required by ImageField (hero image, team photos)
+Pillow>=11.0
 
 # Production serving
 gunicorn>=23.0
