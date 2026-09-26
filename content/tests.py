@@ -481,9 +481,9 @@ class ContentModelTests(TestCase):
     def test_social_platform_is_unique(self):
         from django.db.utils import IntegrityError
 
-        SocialLink.objects.create(platform="twitter", label="Twitter")
+        SocialLink.objects.create(platform="facebook", label="Facebook")
         with self.assertRaises(IntegrityError):
-            SocialLink.objects.create(platform="twitter", label="Twitter again")
+            SocialLink.objects.create(platform="facebook", label="Facebook again")
 
 
 class SeedCommandTests(TestCase):
@@ -499,3 +499,90 @@ class SeedCommandTests(TestCase):
         self.assertEqual(Package.objects.count(), 4)
         self.assertEqual(FaqItem.objects.count(), 7)
         self.assertEqual(TeamMember.objects.count(), 3)
+
+    def test_seed_keeps_what_was_edited_in_the_admin(self):
+        """Render re-seeds on every deploy, so edits have to survive it."""
+        from django.core.management import call_command
+
+        call_command("seed_content", verbosity=0)
+        link = SocialLink.objects.get(platform="whatsapp")
+        link.href = "https://wa.me/9779800000000"
+        link.label = "Chat on WhatsApp"
+        link.order = 9
+        link.save()
+        industry = Industry.objects.first()
+        industry.pitch = "Rewritten by hand in the admin."
+        industry.save()
+
+        call_command("seed_content", verbosity=0)
+
+        link.refresh_from_db()
+        industry.refresh_from_db()
+        self.assertEqual(link.href, "https://wa.me/9779800000000")
+        self.assertEqual(link.label, "Chat on WhatsApp")
+        self.assertEqual(link.order, 9)
+        self.assertEqual(industry.pitch, "Rewritten by hand in the admin.")
+
+    def test_seed_refills_a_field_left_blank(self):
+        from django.core.management import call_command
+
+        call_command("seed_content", verbosity=0)
+        industry = Industry.objects.first()
+        industry.pitch = ""
+        industry.save()
+
+        call_command("seed_content", verbosity=0)
+
+        industry.refresh_from_db()
+        self.assertNotEqual(industry.pitch, "")
+
+    def test_seed_removes_a_platform_no_longer_offered(self):
+        from django.core.management import call_command
+
+        SocialLink.objects.create(platform="twitter", label="Twitter", order=7)
+
+        call_command("seed_content", verbosity=0)
+
+        self.assertFalse(SocialLink.objects.filter(platform="twitter").exists())
+        self.assertEqual(
+            sorted(SocialLink.objects.values_list("platform", flat=True)),
+            ["facebook", "instagram", "linkedin", "whatsapp"],
+        )
+
+    def test_seed_keeps_a_dropped_platform_that_has_a_url(self):
+        """Deleting a link someone filled in would be losing their work."""
+        from django.core.management import call_command
+
+        SocialLink.objects.create(platform="medium", label="Medium", href="https://medium.com/@orik")
+
+        call_command("seed_content", verbosity=0)
+
+        self.assertTrue(SocialLink.objects.filter(platform="medium").exists())
+
+
+class AdminIconTests(TestCase):
+    def test_every_platform_has_a_glyph(self):
+        from content.icons import PLATFORM_PATHS
+
+        for key, _ in SocialLink.PLATFORMS:
+            self.assertIn(key, PLATFORM_PATHS, f"{key} would show a dash in the admin")
+
+    def test_an_unknown_platform_falls_back_to_a_dash(self):
+        from content.icons import glyph
+
+        self.assertNotIn("<svg", glyph("myspace"))
+
+    def test_the_changelist_draws_the_icons(self):
+        from django.contrib.auth import get_user_model
+
+        get_user_model().objects.create_superuser("iconadmin", "icon@example.com", "pw-for-tests")
+        self.client.login(username="iconadmin", password="pw-for-tests")
+        SocialLink.objects.create(platform="whatsapp", label="WhatsApp", href="https://wa.me/1")
+        SocialLink.objects.create(platform="linkedin", label="LinkedIn")
+
+        html = self.client.get("/admin/content/sociallink/").content.decode()
+
+        self.assertEqual(html.count("<svg"), 2)
+        # The one with no URL is dimmed, because the site hides it.
+        self.assertIn("opacity:0.3", html)
+        self.assertIn("opacity:1", html)

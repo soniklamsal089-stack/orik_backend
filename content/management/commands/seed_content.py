@@ -330,7 +330,7 @@ class Command(BaseCommand):
             "hero badges": self._seed(
                 HeroBadge, HERO_BADGES, lambda i, row: ({"hero": hero, "label": row[0]}, {"icon": row[1], "order": i})
             ),
-            "social links": self._seed(SocialLink, SOCIALS, lambda i, row: ({"platform": row[0]}, {"label": row[1], "href": "", "order": i})),
+            "social links": self._seed(SocialLink, SOCIALS, lambda i, row: ({"platform": row[0]}, {"label": row[1], "order": i})),
             "stats": self._seed(
                 Stat, STATS, lambda i, row: ({"value": row[0], "label": row[1]}, {"section": digital, "order": i})
             ),
@@ -367,6 +367,14 @@ class Command(BaseCommand):
 
         for label, (created, updated) in counts.items():
             self.say(f"  {label}: {created} created, {updated} updated")
+
+        # Platforms dropped from SOCIALS linger in databases seeded earlier.
+        # Only the ones with no URL go: a filled-in link is content someone typed.
+        stale = SocialLink.objects.exclude(platform__in=[key for key, _ in SOCIALS]).filter(href="")
+        names = sorted(row.label or row.platform for row in stale)
+        if names:
+            stale.delete()
+            self.say(self.style.WARNING(f"  removed unused social links: {', '.join(names)}"))
         self.say(self.style.SUCCESS("Content seeded. Testimonials are intentionally left empty; team rows are placeholders to edit."))
 
     def say(self, message):
@@ -375,10 +383,30 @@ class Command(BaseCommand):
 
     @staticmethod
     def _seed(model, rows, build):
+        """Creates missing rows, and on rows that already exist fills only blanks.
+
+        Content edited in the admin has to survive the next deploy, and Render
+        runs this command on every one, so an existing value is never replaced.
+        `order` is left alone entirely: reordering happens on the list page.
+        """
         created = updated = 0
         for index, row in enumerate(rows):
             lookup, defaults = build(index, row)
-            _, was_created = model.objects.update_or_create(**lookup, defaults=defaults)
-            created += was_created
-            updated += not was_created
+            existing = model.objects.filter(**lookup).first()
+            if existing is None:
+                model.objects.create(**lookup, **defaults)
+                created += 1
+                continue
+            gaps = {}
+            for field, value in defaults.items():
+                if field == "order":
+                    continue
+                # attname is "<field>_id" for a relation, so no extra query.
+                if not getattr(existing, model._meta.get_field(field).attname):
+                    gaps[field] = value
+            if gaps:
+                for field, value in gaps.items():
+                    setattr(existing, field, value)
+                existing.save(update_fields=list(gaps))
+                updated += 1
         return created, updated

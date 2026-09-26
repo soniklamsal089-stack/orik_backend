@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from .icons import glyph
+
 from .models import (
     DigitalExperiencesSection,
     FooterTopSection,
@@ -171,7 +173,20 @@ class FooterTopAdmin(admin.ModelAdmin):
 
 @admin.register(SocialLink)
 class SocialLinkAdmin(OrderedAdmin):
-    display_columns = ["label", "platform", "href"]
+    display_columns = ["icon", "label", "platform", "href"]
+    list_display_links = ["icon", "label"]
+    readonly_fields = ["icon_preview"]
+    fields = ["icon_preview", "platform", "label", "href", "order", "is_published"]
+
+    @admin.display(description="icon")
+    def icon(self, obj):
+        # Dimmed when the URL is blank, which is exactly when the site hides it.
+        return glyph(obj.platform, muted=not obj.href)
+
+    @admin.display(description="icon")
+    def icon_preview(self, obj):
+        # obj is an empty unsaved instance on the add form, so this shows a dash.
+        return glyph(obj.platform, size=32)
 
 
 # Stat has no sidebar entry of its own: figures are edited inside

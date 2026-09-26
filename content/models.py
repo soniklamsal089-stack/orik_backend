@@ -212,14 +212,13 @@ class HeroBadge(OrderedContent):
 
 
 class SocialLink(OrderedContent):
+    # The footer shows these four. Adding one means adding its glyph in both
+    # content/icons.py and frontend/src/components/ui/SocialIcon.tsx.
     PLATFORMS = [
         ("whatsapp", "WhatsApp"),
         ("instagram", "Instagram"),
         ("facebook", "Facebook"),
         ("linkedin", "LinkedIn"),
-        ("twitter", "Twitter"),
-        ("youtube", "YouTube"),
-        ("medium", "Medium"),
     ]
 
     platform = models.CharField(max_length=20, choices=PLATFORMS, unique=True)
