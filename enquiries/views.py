@@ -1,8 +1,8 @@
 from rest_framework import generics
 from rest_framework.throttling import AnonRateThrottle
 
-from .models import Enquiry, Subscriber
-from .serializers import EnquirySerializer, SubscriberSerializer
+from .models import Enquiry
+from .serializers import EnquirySerializer
 
 
 class EnquiryRateThrottle(AnonRateThrottle):
@@ -17,24 +17,6 @@ class EnquiryCreateView(generics.CreateAPIView):
     queryset = Enquiry.objects.all()
     serializer_class = EnquirySerializer
     throttle_classes = [EnquiryRateThrottle]
-
-    def perform_create(self, serializer):
-        serializer.save(
-            ip_address=client_ip(self.request),
-            user_agent=self.request.META.get("HTTP_USER_AGENT", "")[:300],
-        )
-
-
-class SubscriberRateThrottle(AnonRateThrottle):
-    scope = "subscribers"
-
-
-class SubscriberCreateView(generics.CreateAPIView):
-    """Accepts popup sign-ups. Write-only: the list is read in the admin."""
-
-    queryset = Subscriber.objects.all()
-    serializer_class = SubscriberSerializer
-    throttle_classes = [SubscriberRateThrottle]
 
     def perform_create(self, serializer):
         serializer.save(

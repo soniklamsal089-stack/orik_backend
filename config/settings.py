@@ -154,7 +154,6 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_THROTTLE_RATES": {
         "enquiries": env("ENQUIRY_RATE_LIMIT", "5/hour"),
-        "subscribers": env("SUBSCRIBE_RATE_LIMIT", "10/hour"),
     },
 }
 
@@ -243,7 +242,6 @@ JAZZMIN_SETTINGS = {
         "content.SocialLink",
         "content.FooterTopSection",
         "content.FooterBottomSection",
-        "content.PopupSection",
         "enquiries",
         "auth",
     ],

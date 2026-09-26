@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Enquiry, Subscriber
+from .models import Enquiry
 
 
 class EnquirySerializer(serializers.ModelSerializer):
@@ -33,33 +33,3 @@ class EnquirySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop("website", None)
         return super().create(validated_data)
-
-
-class SubscriberSerializer(serializers.ModelSerializer):
-    # Same honeypot as the enquiry form.
-    website = serializers.CharField(required=False, allow_blank=True, write_only=True)
-
-    class Meta:
-        model = Subscriber
-        fields = ["id", "email", "website", "created_at"]
-        read_only_fields = ["id", "created_at"]
-        # Signing up twice is not an error worth showing a visitor.
-        extra_kwargs = {"email": {"validators": []}}
-
-    def validate_website(self, value):
-        if value.strip():
-            raise serializers.ValidationError("This sign-up could not be accepted.")
-        return value
-
-    def validate_email(self, value):
-        return value.strip().lower()
-
-    def create(self, validated_data):
-        validated_data.pop("website", None)
-        email = validated_data.pop("email")
-        # An address that is already on the list just gets reactivated, so a
-        # second sign-up reads as success rather than "email already exists".
-        subscriber, _ = Subscriber.objects.update_or_create(
-            email=email, defaults={**validated_data, "is_active": True}
-        )
-        return subscriber

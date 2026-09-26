@@ -9,7 +9,6 @@ from rest_framework import serializers
 from .models import (
     DigitalExperiencesSection,
     FooterBottomSection,
-    PopupSection,
     FooterLink,
     FooterTopSection,
     IndustriesSection,
@@ -224,18 +223,6 @@ class FooterBottomSerializer(serializers.ModelSerializer):
         # An unsaved fallback section has no related rows yet.
         links = obj.links.published() if obj.pk else FooterLink.objects.none()
         return FooterLinkSerializer(links, many=True).data
-
-
-class PopupSerializer(serializers.ModelSerializer):
-    isEnabled = serializers.BooleanField(source="is_enabled", read_only=True)
-    emailLabel = serializers.CharField(source="email_label", read_only=True)
-    buttonLabel = serializers.CharField(source="button_label", read_only=True)
-    successMessage = serializers.CharField(source="success_message", read_only=True)
-    delaySeconds = serializers.IntegerField(source="delay_seconds", read_only=True)
-
-    class Meta:
-        model = PopupSection
-        fields = ["isEnabled", "eyebrow", "heading", "body", "emailLabel", "buttonLabel", "successMessage", "delaySeconds"]
 
 
 class FooterTopSerializer(serializers.ModelSerializer):
