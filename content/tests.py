@@ -4,6 +4,7 @@ from django.urls import reverse
 from .models import (
     DigitalExperiencesSection,
     FaqItem,
+    FooterTopSection,
     HeroBadge,
     HeroSection,
     IndustriesSection,
@@ -55,6 +56,7 @@ class ContentApiTests(TestCase):
         expected = {
             "site",
             "industriesSection",
+            "footerTop",
             "templates",
             "hero",
             "yourIdea",
@@ -114,6 +116,60 @@ class ContentApiTests(TestCase):
 
     def test_content_is_read_only(self):
         self.assertEqual(self.client.post("/api/content/faqs/", {"question": "x", "answer": "y"}).status_code, 405)
+
+
+class FooterTopTests(TestCase):
+    def setUp(self):
+        self.url = reverse("site-content")
+        self.section = FooterTopSection.objects.create()
+
+    def payload(self):
+        return self.client.get(self.url).json()["footerTop"]
+
+    def test_defaults_match_the_current_copy(self):
+        data = self.payload()
+        self.assertEqual(data["left"]["heading"], "Business first, with personal support.")
+        self.assertEqual(data["left"]["ctaLabel"], "Our process")
+        self.assertEqual(data["right"]["eyebrow"], "Why ORIK Webcraft")
+        self.assertEqual(data["right"]["ctaHref"], "/work")
+
+    def test_right_heading_keeps_its_line_break(self):
+        self.assertIn("\n", self.payload()["right"]["heading"])
+
+    def test_missing_images_are_empty_so_the_frontend_keeps_its_own(self):
+        data = self.payload()
+        self.assertEqual(data["left"]["image"], "")
+        self.assertEqual(data["right"]["image"], "")
+
+    def test_edits_are_served(self):
+        self.section.left_heading = "Edited left."
+        self.section.right_cta_label = "Edited button"
+        self.section.save()
+
+        data = self.payload()
+        self.assertEqual(data["left"]["heading"], "Edited left.")
+        self.assertEqual(data["right"]["ctaLabel"], "Edited button")
+
+    def test_payload_survives_an_unconfigured_section(self):
+        FooterTopSection.objects.all().delete()
+        # An unsaved default still carries the built-in copy.
+        self.assertEqual(self.payload()["left"]["ctaHref"], "/process")
+
+    def test_second_section_is_refused(self):
+        from django.core.exceptions import ValidationError
+
+        with self.assertRaises(ValidationError):
+            FooterTopSection().clean()
+
+    def test_uploaded_image_requires_alt_text(self):
+        from django.core.exceptions import ValidationError
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        self.section.left_image = SimpleUploadedFile("p.jpg", b"x", content_type="image/jpeg")
+        self.section.left_image_alt = "  "
+        with self.assertRaises(ValidationError) as caught:
+            self.section.clean()
+        self.assertIn("left_image_alt", caught.exception.message_dict)
 
 
 class TemplateTests(TestCase):

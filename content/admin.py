@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import (
     DigitalExperiencesSection,
+    FooterTopSection,
     IndustriesSection,
     Template,
     FaqItem,
@@ -130,6 +131,39 @@ class SiteSettingsAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         # Singleton: one row, edited in place.
         return not SiteSettings.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(FooterTopSection)
+class FooterTopAdmin(admin.ModelAdmin):
+    list_display = ["__str__", "updated_at"]
+    fieldsets = [
+        (
+            "Left panel",
+            {
+                "fields": ["left_heading", "left_cta_label", "left_cta_href", "left_image", "left_image_alt"],
+                "description": "Press Enter in the heading where you want the line to break.",
+            },
+        ),
+        (
+            "Right panel",
+            {
+                "fields": [
+                    "right_eyebrow",
+                    "right_heading",
+                    "right_cta_label",
+                    "right_cta_href",
+                    "right_image",
+                    "right_image_alt",
+                ]
+            },
+        ),
+    ]
+
+    def has_add_permission(self, request):
+        return not FooterTopSection.objects.exists()
 
     def has_delete_permission(self, request, obj=None):
         return False

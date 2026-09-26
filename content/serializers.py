@@ -8,6 +8,7 @@ from rest_framework import serializers
 
 from .models import (
     DigitalExperiencesSection,
+    FooterTopSection,
     IndustriesSection,
     Template,
     FaqItem,
@@ -191,3 +192,40 @@ class TeamMemberSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         # Absolute, so the Next.js server can fetch it from its own process.
         return request.build_absolute_uri(obj.photo.url) if request else obj.photo.url
+
+
+class FooterTopSerializer(serializers.ModelSerializer):
+    """Split into left/right panels, matching how the frontend lays them out."""
+
+    left = serializers.SerializerMethodField()
+    right = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FooterTopSection
+        fields = ["left", "right"]
+
+    def _image(self, field):
+        if not field:
+            # Empty means "keep the photo bundled with the frontend".
+            return ""
+        request = self.context.get("request")
+        return request.build_absolute_uri(field.url) if request else field.url
+
+    def get_left(self, obj):
+        return {
+            "heading": obj.left_heading,
+            "ctaLabel": obj.left_cta_label,
+            "ctaHref": obj.left_cta_href,
+            "image": self._image(obj.left_image),
+            "imageAlt": obj.left_image_alt,
+        }
+
+    def get_right(self, obj):
+        return {
+            "eyebrow": obj.right_eyebrow,
+            "heading": obj.right_heading,
+            "ctaLabel": obj.right_cta_label,
+            "ctaHref": obj.right_cta_href,
+            "image": self._image(obj.right_image),
+            "imageAlt": obj.right_image_alt,
+        }

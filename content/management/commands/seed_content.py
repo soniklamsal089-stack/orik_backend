@@ -10,6 +10,7 @@ from django.db import transaction
 
 from content.models import (
     DigitalExperiencesSection,
+    FooterTopSection,
     IndustriesSection,
     Template,
     FaqItem,
@@ -284,6 +285,7 @@ class Command(BaseCommand):
             YourIdeaSection.objects.all().delete()
             DigitalExperiencesSection.objects.all().delete()
             IndustriesSection.objects.all().delete()
+            FooterTopSection.objects.all().delete()
             self.say(self.style.WARNING("Existing content deleted."))
 
         settings_row, _ = SiteSettings.objects.get_or_create(pk=1, defaults=SITE)
@@ -304,6 +306,9 @@ class Command(BaseCommand):
 
         industries_section, industries_created = IndustriesSection.objects.get_or_create(pk=1)
         self.say(f"  industries section: {'created' if industries_created else 'left as edited'}")
+
+        footer_top, footer_created = FooterTopSection.objects.get_or_create(pk=1)
+        self.say(f"  footer top: {'created' if footer_created else 'left as edited'}")
 
         templates = {}
         created = updated = 0

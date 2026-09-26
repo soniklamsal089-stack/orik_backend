@@ -441,3 +441,54 @@ class TeamMember(OrderedContent):
             ("email", f"mailto:{self.email}" if self.email else ""),
         ]
         return [{"platform": platform, "href": href} for platform, href in pairs if href]
+
+
+class FooterTopSection(models.Model):
+    """The two photo panels above the footer.
+
+    Layout, overlay and image positions stay in the frontend; only the wording,
+    the buttons and the photos are editable here.
+    """
+
+    left_heading = models.TextField(
+        default="Business first, with personal support.",
+        help_text="Line breaks are kept on wide screens.",
+    )
+    left_cta_label = models.CharField(max_length=60, default="Our process")
+    left_cta_href = models.CharField(max_length=120, default="/process", help_text='A path such as "/process".')
+    left_image = models.ImageField(upload_to="footer-top/", blank=True, help_text="Leave blank to keep the built-in photo.")
+    left_image_alt = models.CharField(max_length=160, blank=True, help_text="Required if you upload an image.")
+
+    right_eyebrow = models.CharField(max_length=60, default="Why ORIK Webcraft", help_text="The small line above the heading.")
+    right_heading = models.TextField(
+        default="Responsive, modern websites\nthat grow with you.",
+        help_text="Line breaks are kept on wide screens.",
+    )
+    right_cta_label = models.CharField(max_length=60, default="View our work")
+    right_cta_href = models.CharField(max_length=120, default="/work")
+    right_image = models.ImageField(upload_to="footer-top/", blank=True, help_text="Leave blank to keep the built-in photo.")
+    right_image_alt = models.CharField(max_length=160, blank=True, help_text="Required if you upload an image.")
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "footer top"
+        verbose_name_plural = "footer top"
+
+    def __str__(self):
+        return self.left_heading.replace("\n", " ")[:60] or "Footer top"
+
+    def clean(self):
+        if not self.pk and FooterTopSection.objects.exists():
+            raise ValidationError("This section already exists — edit it instead of adding another.")
+        errors = {}
+        if self.left_image and not self.left_image_alt.strip():
+            errors["left_image_alt"] = "Describe the image so screen readers can announce it."
+        if self.right_image and not self.right_image_alt.strip():
+            errors["right_image_alt"] = "Describe the image so screen readers can announce it."
+        if errors:
+            raise ValidationError(errors)
+
+    @classmethod
+    def load(cls):
+        return cls.objects.first() or cls()
