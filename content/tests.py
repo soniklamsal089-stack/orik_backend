@@ -586,3 +586,18 @@ class AdminIconTests(TestCase):
         # The one with no URL is dimmed, because the site hides it.
         self.assertIn("opacity:0.3", html)
         self.assertIn("opacity:1", html)
+
+    def test_the_changelist_says_why_a_link_is_hidden(self):
+        from django.contrib.auth import get_user_model
+
+        get_user_model().objects.create_superuser("whyadmin", "why@example.com", "pw-for-tests")
+        self.client.login(username="whyadmin", password="pw-for-tests")
+        SocialLink.objects.create(platform="whatsapp", label="WhatsApp", href="https://wa.me/1")
+        SocialLink.objects.create(platform="instagram", label="Instagram")
+        SocialLink.objects.create(platform="facebook", label="Facebook", href="https://fb.com/x", is_published=False)
+
+        html = self.client.get("/admin/content/sociallink/").content.decode()
+
+        self.assertIn("add a URL", html)
+        self.assertIn("unpublished", html)
+        self.assertEqual(html.count(">Yes</b>"), 1)

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 
 from .icons import glyph
 
@@ -173,7 +174,7 @@ class FooterTopAdmin(admin.ModelAdmin):
 
 @admin.register(SocialLink)
 class SocialLinkAdmin(OrderedAdmin):
-    display_columns = ["icon", "label", "platform", "href"]
+    display_columns = ["icon", "label", "platform", "href", "visibility"]
     list_display_links = ["icon", "label"]
     readonly_fields = ["icon_preview"]
     fields = ["icon_preview", "platform", "label", "href", "order", "is_published"]
@@ -187,6 +188,15 @@ class SocialLinkAdmin(OrderedAdmin):
     def icon_preview(self, obj):
         # obj is an empty unsaved instance on the add form, so this shows a dash.
         return glyph(obj.platform, size=32)
+
+    @admin.display(description="shows on site")
+    def visibility(self, obj):
+        """Spells out why a row is not in the footer, which the dimming only hints at."""
+        if not obj.is_published:
+            return format_html('<b style="color:#8a8a8a">No</b> &mdash; unpublished')
+        if not obj.href:
+            return format_html('<b style="color:#b45309">No</b> &mdash; add a URL')
+        return format_html('<b style="color:#008454">Yes</b>')
 
 
 # Stat has no sidebar entry of its own: figures are edited inside
