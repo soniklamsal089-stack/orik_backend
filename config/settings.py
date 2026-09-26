@@ -138,7 +138,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     # Compresses and fingerprints static files so they can be cached forever.
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    "staticfiles": {"BACKEND": "config.storage.ForgivingManifestStaticFilesStorage"},
 }
 
 # Uploaded images (team portraits). In production serve these from the web
@@ -260,4 +260,19 @@ JAZZMIN_UI_TWEAKS = {
     },
     "sidebar_nav_flat_style": True,
     "actions_sticky_top": True,
+}
+
+
+# Without this, Django logs nothing for a 500 when DEBUG is off, so a crash in
+# production leaves no trace in the host's log.
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {"simple": {"format": "{levelname} {name} {message}", "style": "{"}},
+    "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "simple"}},
+    "root": {"handlers": ["console"], "level": "INFO"},
+    "loggers": {
+        # Tracebacks for unhandled exceptions, which is what was missing.
+        "django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False},
+    },
 }
