@@ -531,6 +531,40 @@ class FooterLink(OrderedContent):
         return self.label
 
 
+class PopupSection(models.Model):
+    """The sign-up popup. Off until someone turns it on."""
+
+    is_enabled = models.BooleanField(default=False, help_text="Nothing appears on the site until this is ticked.")
+    eyebrow = models.CharField(max_length=60, blank=True, default="Free guide", help_text="The small line above the heading.")
+    heading = models.CharField(max_length=120, default="Get more enquiries from your website.")
+    body = models.TextField(
+        default="Practical tips on getting found online and turning visits into enquiries. No spam, unsubscribe any time.",
+    )
+    email_label = models.CharField(max_length=60, default="Your email address")
+    button_label = models.CharField(max_length=40, default="Subscribe")
+    success_message = models.CharField(max_length=160, default="Thanks — check your inbox soon.")
+    delay_seconds = models.PositiveSmallIntegerField(
+        default=12,
+        help_text="How long to wait before it appears. Showing it instantly annoys people and they leave.",
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "popup"
+        verbose_name_plural = "popup"
+
+    def __str__(self):
+        return "Popup"
+
+    def clean(self):
+        if not self.pk and PopupSection.objects.exists():
+            raise ValidationError("This section already exists — edit it instead of adding another.")
+
+    @classmethod
+    def load(cls):
+        return cls.objects.first() or cls()
+
+
 class FooterTopSection(models.Model):
     """The two photo panels above the footer.
 

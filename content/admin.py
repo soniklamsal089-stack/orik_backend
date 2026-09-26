@@ -6,6 +6,7 @@ from .icons import glyph
 from .models import (
     DigitalExperiencesSection,
     FooterBottomSection,
+    PopupSection,
     FooterLink,
     FooterTopSection,
     IndustriesSection,
@@ -175,6 +176,26 @@ class FooterTopAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return not FooterTopSection.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(PopupSection)
+class PopupAdmin(admin.ModelAdmin):
+    list_display = ["__str__", "is_enabled", "delay_seconds", "updated_at"]
+    fieldsets = [
+        ("Show it", {"fields": ["is_enabled", "delay_seconds"]}),
+        ("Wording", {"fields": ["eyebrow", "heading", "body"]}),
+        ("Form", {"fields": ["email_label", "button_label", "success_message"]}),
+        (
+            "Sign-ups",
+            {"fields": [], "description": "Addresses collected here appear under Enquiries → Subscribers."},
+        ),
+    ]
+
+    def has_add_permission(self, request):
+        return not PopupSection.objects.exists()
 
     def has_delete_permission(self, request, obj=None):
         return False

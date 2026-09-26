@@ -31,3 +31,25 @@ class Enquiry(models.Model):
 
     def __str__(self):
         return f"{self.name} — {self.business}"
+
+
+class Subscriber(models.Model):
+    """An email address left in the popup.
+
+    Kept apart from Enquiry on purpose: an enquiry is someone asking for work,
+    a subscriber is only permission to email them.
+    """
+
+    email = models.EmailField(unique=True, help_text="Unique: a second sign-up updates the first.")
+    is_active = models.BooleanField(default=True, help_text="Clear this instead of deleting when someone opts out.")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    # Kept for abuse triage only; never returned by the API.
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=300, blank=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+
+    def __str__(self):
+        return self.email

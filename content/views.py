@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from .models import (
     DigitalExperiencesSection,
     FooterBottomSection,
+    PopupSection,
     FooterTopSection,
     IndustriesSection,
     Template,
@@ -24,6 +25,7 @@ from .models import (
 from .serializers import (
     DigitalExperiencesSerializer,
     FooterBottomSerializer,
+    PopupSerializer,
     FooterTopSerializer,
     IndustriesSectionSerializer,
     TemplateSerializer,
@@ -74,6 +76,7 @@ class SiteContentView(APIView):
             "industriesSection": IndustriesSectionSerializer(IndustriesSection.load()).data,
             "footerTop": FooterTopSerializer(FooterTopSection.load(), context={"request": _request}).data,
             "footerBottom": FooterBottomSerializer(FooterBottomSection.load()).data,
+            "popup": PopupSerializer(PopupSection.load()).data,
         }
         for key, model, serializer in CONTENT_SECTIONS:
             payload[key] = serializer(model.objects.published(), many=True, context={"request": _request}).data

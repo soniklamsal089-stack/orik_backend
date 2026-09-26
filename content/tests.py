@@ -71,6 +71,7 @@ class ContentApiTests(TestCase):
             "testimonials",
             "faqs",
             "footerBottom",
+            "popup",
         }
         self.assertEqual(set(data), expected)
 
@@ -697,3 +698,29 @@ class WhatsAppNumberTests(TestCase):
         link = SocialLink.objects.create(platform="whatsapp", label="WhatsApp", href="https://wa.me/123")
 
         self.assertEqual(link.href, "https://wa.me/123")
+
+
+class PopupSectionTests(TestCase):
+    def test_the_popup_is_off_until_someone_turns_it_on(self):
+        payload = self.client.get("/api/content/").json()["popup"]
+
+        self.assertFalse(payload["isEnabled"])
+
+    def test_the_api_carries_the_wording_and_the_delay(self):
+        from content.models import PopupSection
+
+        PopupSection.objects.create(
+            is_enabled=True,
+            eyebrow="Free guide",
+            heading="Get more enquiries.",
+            body="No spam.",
+            button_label="Join",
+            delay_seconds=20,
+        )
+
+        payload = self.client.get("/api/content/").json()["popup"]
+
+        self.assertTrue(payload["isEnabled"])
+        self.assertEqual(payload["heading"], "Get more enquiries.")
+        self.assertEqual(payload["buttonLabel"], "Join")
+        self.assertEqual(payload["delaySeconds"], 20)

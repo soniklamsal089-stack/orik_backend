@@ -11,6 +11,7 @@ from django.db import transaction
 from content.models import (
     DigitalExperiencesSection,
     FooterBottomSection,
+    PopupSection,
     FooterLink,
     FooterTopSection,
     IndustriesSection,
@@ -312,6 +313,7 @@ class Command(BaseCommand):
             IndustriesSection.objects.all().delete()
             FooterTopSection.objects.all().delete()
             FooterBottomSection.objects.all().delete()
+            PopupSection.objects.all().delete()
             self.say(self.style.WARNING("Existing content deleted."))
 
         settings_row, _ = SiteSettings.objects.get_or_create(pk=1, defaults=SITE)
@@ -325,6 +327,7 @@ class Command(BaseCommand):
         self.say(f"  hero: {'created' if hero_created else 'left as edited'} ({hero.heading[:40]})")
 
         footer_bottom, _ = FooterBottomSection.objects.get_or_create(pk=1, defaults=FOOTER_BOTTOM)
+        PopupSection.objects.get_or_create(pk=1)
         idea, idea_created = YourIdeaSection.objects.get_or_create(pk=1, defaults=YOUR_IDEA)
         self.say(f"  your idea: {'created' if idea_created else 'left as edited'}")
 
