@@ -35,6 +35,7 @@ YOUR_IDEA = {
         "We turn those problems into a simple digital experience that helps customers discover, understand "
         "and contact your business."
     ),
+    "heading_highlight": "social media page.",
     "cta_label": "Get a free consultation",
     "cta_href": "/contact",
 }
@@ -93,14 +94,17 @@ PROBLEMS = [
     (
         "No website",
         "Customers search online first. Without a website they can't find you, so they find a competitor instead.",
+        "search-x",
     ),
     (
         "Outdated website",
         "A slow or old-looking site makes a great business look unreliable, especially on a phone.",
+        "history",
     ),
     (
         "Difficult to contact",
         "If people can't quickly call, message or send an enquiry, they leave before they ever reach you.",
+        "message-circle-off",
     ),
 ]
 
@@ -335,7 +339,9 @@ class Command(BaseCommand):
                 Stat, STATS, lambda i, row: ({"value": row[0], "label": row[1]}, {"section": digital, "order": i})
             ),
             "problems": self._seed(
-                Problem, PROBLEMS, lambda i, row: ({"title": row[0]}, {"section": idea, "description": row[1], "order": i})
+                Problem,
+                PROBLEMS,
+                lambda i, row: ({"title": row[0]}, {"section": idea, "description": row[1], "icon": row[2], "order": i}),
             ),
             "industries": self._seed(
                 Industry,

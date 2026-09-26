@@ -282,6 +282,11 @@ class YourIdeaSection(models.Model):
     """
 
     heading = models.TextField(help_text="Line breaks are kept on wide screens.")
+    heading_highlight = models.CharField(
+        max_length=80,
+        blank=True,
+        help_text="Words from the heading to mark in yellow, e.g. “social media page.” Leave blank for none.",
+    )
     closing_text = models.TextField(help_text="The line under the cards.")
     cta_label = models.CharField(max_length=60, default="Get a free consultation")
     cta_href = models.CharField(max_length=120, default="/contact", help_text='A path such as "/contact".')
@@ -314,8 +319,18 @@ class Problem(OrderedContent):
         blank=True,
         help_text="Set automatically; cards are edited inside the section.",
     )
+    ICONS = [
+        ("search-x", "Not found in search"),
+        ("history", "Out of date"),
+        ("message-circle-off", "No way to get in touch"),
+        ("monitor-x", "Broken on phones"),
+        ("hourglass", "Slow to load"),
+        ("triangle-alert", "General warning"),
+    ]
+
     title = models.CharField(max_length=80)
     description = models.TextField()
+    icon = models.CharField(max_length=24, choices=ICONS, default="triangle-alert")
 
     def __str__(self):
         return self.title

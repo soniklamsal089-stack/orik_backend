@@ -61,13 +61,14 @@ class DigitalExperiencesSerializer(serializers.ModelSerializer):
 
 
 class YourIdeaSerializer(serializers.ModelSerializer):
+    headingHighlight = serializers.CharField(source="heading_highlight", read_only=True)
     closingText = serializers.CharField(source="closing_text", read_only=True)
     ctaLabel = serializers.CharField(source="cta_label", read_only=True)
     ctaHref = serializers.CharField(source="cta_href", read_only=True)
 
     class Meta:
         model = YourIdeaSection
-        fields = ["heading", "closingText", "ctaLabel", "ctaHref"]
+        fields = ["heading", "headingHighlight", "closingText", "ctaLabel", "ctaHref"]
 
 
 class HeroBadgeSerializer(serializers.ModelSerializer):
@@ -133,7 +134,7 @@ class StatSerializer(serializers.ModelSerializer):
 class ProblemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Problem
-        fields = ["title", "description"]
+        fields = ["title", "description", "icon"]
 
 
 class IndustrySerializer(serializers.ModelSerializer):

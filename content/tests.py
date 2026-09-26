@@ -601,3 +601,31 @@ class AdminIconTests(TestCase):
         self.assertIn("add a URL", html)
         self.assertIn("unpublished", html)
         self.assertEqual(html.count(">Yes</b>"), 1)
+
+
+class YourIdeaHighlightTests(TestCase):
+    def test_the_api_carries_the_highlight_and_each_card_icon(self):
+        from content.models import Problem, YourIdeaSection
+
+        section = YourIdeaSection.objects.create(
+            heading="Your business deserves more" + chr(10) + "than just a social media page.",
+            heading_highlight="social media page.",
+            closing_text="We turn those problems into something simple.",
+        )
+        Problem.objects.create(section=section, title="No website", description="x", icon="search-x", order=0)
+        Problem.objects.create(section=section, title="Outdated website", description="y", icon="history", order=1)
+
+        payload = self.client.get("/api/content/").json()
+
+        self.assertEqual(payload["yourIdea"]["headingHighlight"], "social media page.")
+        self.assertEqual([p["icon"] for p in payload["problems"]], ["search-x", "history"])
+
+    def test_a_blank_highlight_is_allowed(self):
+        """Leaving it empty means the heading is drawn without a marker."""
+        from content.models import YourIdeaSection
+
+        YourIdeaSection.objects.create(heading="Plain heading.", closing_text="z")
+
+        payload = self.client.get("/api/content/").json()
+
+        self.assertEqual(payload["yourIdea"]["headingHighlight"], "")

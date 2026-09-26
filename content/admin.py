@@ -77,7 +77,7 @@ class ProblemInline(admin.StackedInline):
 
     model = Problem
     extra = 0
-    fields = ["title", "description", "order", "is_published"]
+    fields = ["title", "description", "icon", "order", "is_published"]
     ordering = ["order", "id"]
 
 
@@ -86,7 +86,13 @@ class YourIdeaAdmin(admin.ModelAdmin):
     list_display = ["__str__", "updated_at"]
     inlines = [ProblemInline]
     fieldsets = [
-        ("Heading", {"fields": ["heading"], "description": "Press Enter where you want the line to break."}),
+        (
+            "Heading",
+            {
+                "fields": ["heading", "heading_highlight"],
+                "description": "Press Enter where you want the line to break.",
+            },
+        ),
         ("Closing line", {"fields": ["closing_text"]}),
         ("Call to action", {"fields": ["cta_label", "cta_href"]}),
     ]
