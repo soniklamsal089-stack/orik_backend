@@ -51,7 +51,7 @@ SITE = {
 }
 
 HERO = {
-    "heading": "Website design in Nepal that works for your business.",
+    "heading": "Website design that works for your business.",
     "subheading": (
         "Modern websites, landing pages, chatbots and digital solutions designed to help businesses build "
         "credibility, reach customers and generate enquiries."
