@@ -144,17 +144,27 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # --- Cloudinary Configuration ---
 # Cloudinary stores uploaded images permanently in the cloud
-CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": env("CLOUDINARY_CLOUD_NAME"),
-    "API_KEY": env("CLOUDINARY_API_KEY"),
-    "API_SECRET": env("CLOUDINARY_API_SECRET"),
-}
+CLOUDINARY_CLOUD_NAME = env("CLOUDINARY_CLOUD_NAME", "")
+CLOUDINARY_API_KEY = env("CLOUDINARY_API_KEY", "")
+CLOUDINARY_API_SECRET = env("CLOUDINARY_API_SECRET", "")
+
+# Only configure Cloudinary if credentials are provided
+if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
+    CLOUDINARY_STORAGE = {
+        "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
+        "API_KEY": CLOUDINARY_API_KEY,
+        "API_SECRET": CLOUDINARY_API_SECRET,
+    }
 
 # Storage configuration
 STORAGES = {
-    # Use Cloudinary for media files in production, local filesystem in development
+    # Use Cloudinary for media files in production if configured, local filesystem otherwise
     "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage" if not DEBUG else "django.core.files.storage.FileSystemStorage"
+        "BACKEND": (
+            "cloudinary_storage.storage.MediaCloudinaryStorage" 
+            if not DEBUG and CLOUDINARY_CLOUD_NAME 
+            else "django.core.files.storage.FileSystemStorage"
+        )
     },
     # Compresses and fingerprints static files so they can be cached forever.
     "staticfiles": {"BACKEND": "config.storage.ForgivingManifestStaticFilesStorage"},
