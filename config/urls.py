@@ -32,6 +32,10 @@ urlpatterns = [
     path("api/health/", health, name="health"),
 ]
 
+# Serve media files in both development and production
+# In production, Whitenoise will handle this efficiently
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 if settings.DEBUG:
-    # Django only serves uploads during development.
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Additional debug toolbar or other dev-only routes can go here
+    pass
