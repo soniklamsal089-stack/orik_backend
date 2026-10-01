@@ -51,8 +51,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "cloudinary_storage",
-    "cloudinary",
     "corsheaders",
     "rest_framework",
     "enquiries",
@@ -137,35 +135,13 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Uploaded images (team portraits). In production serve these from the web
-# server or object storage, not Django.
+# Uploaded images (team portraits)
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# --- Cloudinary Configuration ---
-# Cloudinary stores uploaded images permanently in the cloud
-CLOUDINARY_CLOUD_NAME = env("CLOUDINARY_CLOUD_NAME", "")
-CLOUDINARY_API_KEY = env("CLOUDINARY_API_KEY", "")
-CLOUDINARY_API_SECRET = env("CLOUDINARY_API_SECRET", "")
-
-# Only configure Cloudinary if credentials are provided
-if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
-    CLOUDINARY_STORAGE = {
-        "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
-        "API_KEY": CLOUDINARY_API_KEY,
-        "API_SECRET": CLOUDINARY_API_SECRET,
-    }
-
 # Storage configuration
 STORAGES = {
-    # Use Cloudinary for media files in production if configured, local filesystem otherwise
-    "default": {
-        "BACKEND": (
-            "cloudinary_storage.storage.MediaCloudinaryStorage" 
-            if not DEBUG and CLOUDINARY_CLOUD_NAME 
-            else "django.core.files.storage.FileSystemStorage"
-        )
-    },
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     # Compresses and fingerprints static files so they can be cached forever.
     "staticfiles": {"BACKEND": "config.storage.ForgivingManifestStaticFilesStorage"},
 }

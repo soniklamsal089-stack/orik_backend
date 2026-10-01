@@ -454,7 +454,7 @@ class TeamMember(OrderedContent):
     name = models.CharField(max_length=80)
     role = models.CharField(max_length=80, help_text='Job title, e.g. "Founder" or "Designer".')
     bio = models.TextField(blank=True, help_text="Optional one or two lines shown under the role.")
-    photo = models.ImageField(upload_to="team/", blank=True, help_text="Portrait. Leave blank to show initials instead.")
+    photo = models.URLField(blank=True, help_text="Cloudinary image URL. Paste your image URL here.")
 
     email = models.EmailField(blank=True)
     whatsapp = models.CharField(max_length=40, blank=True, help_text="Number in international format, e.g. +9779800000000.")
