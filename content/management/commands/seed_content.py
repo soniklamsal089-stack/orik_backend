@@ -247,9 +247,9 @@ PACKAGES = [
 ]
 
 TEAM = [
-    ("Rohan Sharma", "Founder & CEO", "rohan@orikwebcraft.com", "+977-9801234567", "https://www.linkedin.com/in/rohan-sharma", "https://www.facebook.com/rohan.sharma", "https://www.instagram.com/rohan_sharma"),
+    ("Rohan Shah", "Founder & CEO", "rohan@orikwebcraft.com", "+977-9801234567", "https://www.linkedin.com/in/rohan-shah", "https://www.facebook.com/rohan.shah", "https://www.instagram.com/rohan_shah"),
     ("Sonik Lamsal", "Co-Founder & CTO", "sonik@orikwebcraft.com", "+977-9812345678", "https://www.linkedin.com/in/sonik-lamsal", "https://www.facebook.com/sonik.lamsal", "https://www.instagram.com/sonik_lamsal"),
-    ("Priya Thapa", "Lead Designer", "priya@orikwebcraft.com", "+977-9823456789", "https://www.linkedin.com/in/priya-thapa", "https://www.facebook.com/priya.thapa", "https://www.instagram.com/priya_thapa"),
+    ("Subham Karki", "Lead Designer", "subham@orikwebcraft.com", "+977-9823456789", "https://www.linkedin.com/in/subham-karki", "https://www.facebook.com/subham.karki", "https://www.instagram.com/subham_karki"),
 ]
 
 FAQS = [
