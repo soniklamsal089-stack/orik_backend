@@ -475,7 +475,7 @@ class TeamMember(OrderedContent):
             ("whatsapp", f"https://wa.me/{self.whatsapp.lstrip('+').replace(' ', '')}" if self.whatsapp else ""),
             ("email", f"mailto:{self.email}" if self.email else ""),
         ]
-        return [{"platform": platform, "href": href} for platform, href in pairs if href]
+        return [{"platform": platform, "url": url} for platform, url in pairs if url]
 
 
 class FooterBottomSection(models.Model):

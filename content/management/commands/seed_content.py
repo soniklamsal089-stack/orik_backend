@@ -247,9 +247,9 @@ PACKAGES = [
 ]
 
 TEAM = [
-    ("Team Member One", "Founder"),
-    ("Team Member Two", "Designer"),
-    ("Team Member Three", "Developer"),
+    ("Rohan Sharma", "Founder & CEO", "rohan@orikwebcraft.com", "+977-9801234567", "https://www.linkedin.com/in/rohan-sharma", "https://www.facebook.com/rohan.sharma", "https://www.instagram.com/rohan_sharma"),
+    ("Sonik Lamsal", "Co-Founder & CTO", "sonik@orikwebcraft.com", "+977-9812345678", "https://www.linkedin.com/in/sonik-lamsal", "https://www.facebook.com/sonik.lamsal", "https://www.instagram.com/sonik_lamsal"),
+    ("Priya Thapa", "Lead Designer", "priya@orikwebcraft.com", "+977-9823456789", "https://www.linkedin.com/in/priya-thapa", "https://www.facebook.com/priya.thapa", "https://www.instagram.com/priya_thapa"),
 ]
 
 FAQS = [
@@ -392,7 +392,18 @@ class Command(BaseCommand):
             ),
             "process steps": self._seed(ProcessStep, PROCESS_STEPS, lambda i, row: ({"title": row[0]}, {"description": row[1], "order": i})),
             "packages": self._seed(Package, PACKAGES, lambda i, row: ({"name": row[0]}, {"tagline": row[1], "features": "\n".join(row[2]), "order": i})),
-            "team": self._seed(TeamMember, TEAM, lambda i, row: ({"name": row[0]}, {"role": row[1], "order": i})),
+            "team": self._seed(TeamMember, TEAM, lambda i, row: (
+                {"name": row[0]}, 
+                {
+                    "role": row[1], 
+                    "email": row[2], 
+                    "whatsapp": row[3], 
+                    "linkedin": row[4], 
+                    "facebook": row[5], 
+                    "instagram": row[6], 
+                    "order": i
+                }
+            )),
             "FAQs": self._seed(FaqItem, FAQS, lambda i, row: ({"question": row[0]}, {"answer": row[1], "order": i})),
         }
 
