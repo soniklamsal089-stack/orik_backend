@@ -194,9 +194,9 @@ class TeamMemberSerializer(serializers.ModelSerializer):
     def get_photo(self, obj):
         if not obj.photo:
             return ""
-        request = self.context.get("request")
-        # Absolute, so the Next.js server can fetch it from its own process.
-        return request.build_absolute_uri(obj.photo.url) if request else obj.photo.url
+        # Photo is now a URLField (string), not ImageField
+        # Just return the URL directly
+        return obj.photo
 
 
 class FooterLinkSerializer(serializers.ModelSerializer):
