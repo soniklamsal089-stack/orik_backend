@@ -137,12 +137,6 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    # Compresses and fingerprints static files so they can be cached forever.
-    "staticfiles": {"BACKEND": "config.storage.ForgivingManifestStaticFilesStorage"},
-}
-
 # Uploaded images (team portraits). In production serve these from the web
 # server or object storage, not Django.
 MEDIA_URL = "media/"
@@ -156,9 +150,15 @@ CLOUDINARY_STORAGE = {
     "API_SECRET": env("CLOUDINARY_API_SECRET"),
 }
 
-# Use Cloudinary for media file storage in production
-if not DEBUG:
-    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+# Storage configuration
+STORAGES = {
+    # Use Cloudinary for media files in production, local filesystem in development
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage" if not DEBUG else "django.core.files.storage.FileSystemStorage"
+    },
+    # Compresses and fingerprints static files so they can be cached forever.
+    "staticfiles": {"BACKEND": "config.storage.ForgivingManifestStaticFilesStorage"},
+}
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
