@@ -2,6 +2,6 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "python manage.py migrate && python manage.py seed_content --reset && gunicorn config.wsgi:application"
+startCommand = "python manage.py migrate && python manage.py seed_content --reset && python manage.py collectstatic --noinput && gunicorn config.wsgi:application"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10

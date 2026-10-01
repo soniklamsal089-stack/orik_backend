@@ -10,7 +10,22 @@ def health(_request):
     return JsonResponse({"status": "ok"})
 
 
+def root(_request):
+    """Root endpoint showing API is live."""
+    return JsonResponse({
+        "message": "ORIK Webcraft API",
+        "status": "running",
+        "endpoints": {
+            "admin": "/admin/",
+            "api_content": "/api/content/",
+            "api_enquiries": "/api/enquiries/",
+            "health": "/api/health/"
+        }
+    })
+
+
 urlpatterns = [
+    path("", root, name="root"),
     path("admin/", admin.site.urls),
     path("api/", include("enquiries.urls")),
     path("api/", include("content.urls")),

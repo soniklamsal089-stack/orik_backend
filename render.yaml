@@ -3,7 +3,7 @@ services:
     name: orik-backend
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "python manage.py migrate && python manage.py seed_content --reset && gunicorn config.wsgi:application"
+    startCommand: "python manage.py migrate && python manage.py seed_content --reset && python manage.py collectstatic --noinput && gunicorn config.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.1
