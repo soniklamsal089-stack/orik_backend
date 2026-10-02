@@ -48,6 +48,8 @@ SITE = {
         "ORIK Webcraft builds modern websites, landing pages, chatbots and digital solutions that help "
         "businesses build credibility, reach customers and generate enquiries."
     ),
+    "phone": "+977-9842416371",
+    "email": "soniklamsal111@gmail.com",
 }
 
 HERO = {
@@ -68,13 +70,13 @@ HERO_BADGES = [
     ("SEO ready", "seo"),
 ]
 
-# The four the footer is meant to show. Each starts with an empty href, so
-# nothing appears on the site until a real profile URL is filled in.
+# The four the footer is meant to show. WhatsApp uses phone number, others use URL.
+# Format: (platform, label, href_or_phone)
 SOCIALS = [
-    ("whatsapp", "WhatsApp"),
-    ("instagram", "Instagram"),
-    ("facebook", "Facebook"),
-    ("linkedin", "LinkedIn"),
+    ("whatsapp", "WhatsApp", "9779842416371"),  # Phone number for WhatsApp
+    ("instagram", "Instagram", ""),  # Leave empty - fill in admin
+    ("facebook", "Facebook", ""),    # Leave empty - fill in admin
+    ("linkedin", "LinkedIn", ""),    # Leave empty - fill in admin
 ]
 
 FOOTER_BOTTOM = {
@@ -247,9 +249,9 @@ PACKAGES = [
 ]
 
 TEAM = [
-    ("Rohan Shah", "Founder & CEO", "rohan@orikwebcraft.com", "+977-9801234567", "https://www.linkedin.com/in/rohan-shah", "https://www.facebook.com/rohan.shah", "https://www.instagram.com/rohan_shah", "https://res.cloudinary.com/dr54mqokd/image/upload/v1/team/member-one.png"),
-    ("Sonik Lamsal", "Co-Founder & CTO", "sonik@orikwebcraft.com", "+977-9812345678", "https://www.linkedin.com/in/sonik-lamsal", "https://www.facebook.com/sonik.lamsal", "https://www.instagram.com/sonik_lamsal", "https://res.cloudinary.com/dr54mqokd/image/upload/v1/team/member-two.jpg"),
-    ("Subham Karki", "Lead Designer", "subham@orikwebcraft.com", "+977-9823456789", "https://www.linkedin.com/in/subham-karki", "https://www.facebook.com/subham.karki", "https://www.instagram.com/subham_karki", "https://res.cloudinary.com/dr54mqokd/image/upload/v1/team/member-three.jpg"),
+    ("Sonik Lamsal", "Co-Founder & CTO", "soniklamsal111@gmail.com", "+977-9842416371", "https://www.linkedin.com/in/sonik-lamsal", "https://www.facebook.com/sonik.lamsal", "https://www.instagram.com/sonik_lamsal", "https://res.cloudinary.com/dr54mqokd/image/upload/v1790856602/Gemini_Generated_Image_qzpw7oqzpw7oqzpw_mkfzn5.jpg"),
+    ("Rohan Shah", "Founder & CEO", "rohaanshah040@gmail.com", "+977-9823757751", "https://www.linkedin.com/in/rohan-shah", "https://www.facebook.com/rohan.shah", "https://www.instagram.com/rohan_shah", "https://res.cloudinary.com/dr54mqokd/image/upload/v1790863259/aflkdsf_gsqqqr.jpg"),
+    ("Subham Karki", "Co-Founder & Lead Designer", "subham@orikwebcraft.com", "+977-9842416371", "https://www.linkedin.com/in/subham-karki", "https://www.facebook.com/subham.karki", "https://www.instagram.com/subham_karki", ""),
 ]
 
 FAQS = [
@@ -359,7 +361,19 @@ class Command(BaseCommand):
             "footer links": self._seed(
                 FooterLink, FOOTER_LINKS, lambda i, row: ({"label": row[0]}, {"section": footer_bottom, "href": row[1], "order": i})
             ),
-            "social links": self._seed(SocialLink, SOCIALS, lambda i, row: ({"platform": row[0]}, {"label": row[1], "order": i})),
+            "social links": self._seed(
+                SocialLink, 
+                SOCIALS, 
+                lambda i, row: (
+                    {"platform": row[0]}, 
+                    {
+                        "label": row[1], 
+                        "whatsapp_number": row[2] if row[0] == "whatsapp" and len(row) > 2 else "",
+                        "href": row[2] if row[0] != "whatsapp" and len(row) > 2 else "",
+                        "order": i
+                    }
+                )
+            ),
             "stats": self._seed(
                 Stat, STATS, lambda i, row: ({"value": row[0], "label": row[1]}, {"section": digital, "order": i})
             ),
