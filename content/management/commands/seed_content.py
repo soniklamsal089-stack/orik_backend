@@ -427,7 +427,7 @@ class Command(BaseCommand):
 
         # Platforms dropped from SOCIALS linger in databases seeded earlier.
         # Only the ones with no URL go: a filled-in link is content someone typed.
-        stale = SocialLink.objects.exclude(platform__in=[key for key, _ in SOCIALS]).filter(href="")
+        stale = SocialLink.objects.exclude(platform__in=[row[0] for row in SOCIALS]).filter(href="")
         names = sorted(row.label or row.platform for row in stale)
         if names:
             stale.delete()
