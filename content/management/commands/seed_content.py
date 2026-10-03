@@ -48,8 +48,9 @@ SITE = {
         "ORIK Webcraft builds modern websites, landing pages, chatbots and digital solutions that help "
         "businesses build credibility, reach customers and generate enquiries."
     ),
-    "phone": "+977-9842416371",
-    "email": "soniklamsal111@gmail.com",
+    "phone": "+977 9842416371",
+    "email": "orikwebcraft@gmail.com",
+    "location": "Kathmandu, Baneshwor",
 }
 
 HERO = {
@@ -316,10 +317,20 @@ class Command(BaseCommand):
             FooterBottomSection.objects.all().delete()
             self.say(self.style.WARNING("Existing content deleted."))
 
-        settings_row, _ = SiteSettings.objects.get_or_create(pk=1, defaults=SITE)
+        settings_row, settings_created = SiteSettings.objects.get_or_create(pk=1, defaults=SITE)
+        
+        # Update contact info if empty (preserves manual edits but fills blanks)
+        if not settings_row.phone:
+            settings_row.phone = SITE.get("phone", "")
+        if not settings_row.email:
+            settings_row.email = SITE.get("email", "")
+        if not settings_row.location:
+            settings_row.location = SITE.get("location", "")
         if not settings_row.description:
             settings_row.description = SITE["description"]
-            settings_row.save()
+        
+        settings_row.save()
+        self.say(f"  site settings: {'created' if settings_created else 'updated gaps'}")
 
         # Only fills a hero that doesn't exist yet, so re-running never
         # overwrites wording edited in the admin.
