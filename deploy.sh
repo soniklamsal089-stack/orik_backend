@@ -1,13 +1,8 @@
-#!/bin/bash
-# Post-deployment script to run migrations and seed data
+#!/usr/bin/env bash
+# DEPRECATED: This file is no longer used
+# Render now uses build.sh for build and gunicorn for start
+# This is kept for reference only
 
-echo "Running migrations..."
-python manage.py migrate --noinput
-
-echo "Seeding content (this will reset team members to exactly 3)..."
-python manage.py seed_content --reset
-
-echo "Collecting static files..."
-python manage.py collectstatic --noinput
-
-echo "Deployment complete!"
+echo "⚠️  WARNING: deploy.sh is deprecated"
+echo "Build process is handled by build.sh"
+echo "Start command is: gunicorn config.wsgi:application"
