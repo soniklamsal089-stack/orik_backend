@@ -1,4 +1,4 @@
-"""Django settings for the ORIK Webcraft API.
+﻿"""Django settings for the ORIK Webcraft API.
 
 Everything environment-specific is read from .env (see .env.example).
 """
@@ -178,6 +178,17 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 60 * 60 * 24 * 30
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+
+# --- Email Configuration -----------------------------------------------------
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = env("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(env("EMAIL_PORT", "587"))
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
+ENQUIRY_NOTIFICATION_EMAIL = env("ENQUIRY_NOTIFICATION_EMAIL", EMAIL_HOST_USER)
 
 
 # --- Jazzmin admin theme -----------------------------------------------------
